@@ -7,5 +7,6 @@ RUN pip install python-dotenv
 RUN pip install llama-index
 RUN pip install pinecone-client
 RUN pip install transformers
+RUN pip install nltk
 
 WORKDIR /src
