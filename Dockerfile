@@ -1,12 +1,14 @@
-FROM public.ecr.aws/sam/build-python3.9:1.79.0-20230407185812
+FROM --platform=linux/amd64 public.ecr.aws/lambda/python:3.9
 USER root
 
-RUN pip install --upgrade pip
-RUN pip install --upgrade setuptools
-RUN pip install python-dotenv
-RUN pip install llama-index
-RUN pip install pinecone-client
-RUN pip install transformers
-RUN pip install nltk
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+RUN yum -y install vim-enhanced git
 
-WORKDIR /src
+COPY requirements.txt .
+RUN pip install --upgrade pip setuptools wheel
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
+COPY vectordb_base_gpt/* .
+
+WORKDIR .
+CMD [ "http_request_handler.lambda_handler" ]
