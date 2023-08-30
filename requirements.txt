@@ -1,0 +1,16 @@
+git+https://github.com/SoichiroSugimoto/llama_index.git@20230812-original
+aws-wsgi==0.2.7
+boto3>=1.28.30
+Flask>=2.3.2
+nltk>=3.8.1
+pinecone-client>=2.2.2
+pip>=23.2.1
+pipdeptree>=2.13.0
+pynamodb>=5.5.0
+python-dotenv>=1.0.0
+setuptools>=68.1.2
+transformers>=4.31.0
+wheel>=0.41.1
+urllib3<1.27,>=1.25.4
+pydantic==1.10.12
+slack_sdk==3.21.3
