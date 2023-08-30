@@ -1,13 +1,13 @@
 from dotenv import load_dotenv
 import os
 import openai
-import retrieve
+import retriever
 
 
 def main():
     load_dotenv()
     openai.api_key = os.getenv("OPENAI_API_KEY")
-    query_engine = retrieve.create_query_engine()
+    query_engine = retriever.create_query_engine()
     print("Enter a value (press Ctrl+C to exit)")
     conversation_buffer = []
     while True:
