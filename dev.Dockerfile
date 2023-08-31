@@ -1,4 +1,5 @@
-FROM --platform=linux/amd64 public.ecr.aws/lambda/python:3.9
+# Build: docker build -t vectordb_base_gpt:dev -f dev.Dockerfile .
+FROM public.ecr.aws/sam/build-python3.9:1.96.0-20230829212321
 USER root
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
@@ -7,7 +8,5 @@ RUN yum -y install vim-enhanced git
 COPY requirements.txt .
 RUN pip install --upgrade pip setuptools wheel
 RUN pip install -r requirements.txt
-COPY vectordb_base_gpt/* .
 
 WORKDIR .
-CMD [ "http_request_handler.lambda_handler" ]

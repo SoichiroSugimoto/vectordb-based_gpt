@@ -21,7 +21,7 @@ from llama_index.vector_stores import PineconeVectorStore
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
-
+load_dotenv('.env')
 
 def get_index_from_pinecone_ids(ids):
     pinecone_api_key = os.getenv("PINECONE_API_KEY")
@@ -50,10 +50,6 @@ def get_vector_store_index_summary_sets_from_dynamo_db():
         for summary in data_set:
             indicies.append(get_index_from_pinecone_ids(data_set[summary]))
             summaries.append(summary)
-    print("-------------------( a )-----------------------")
-    print(indicies)
-    print(summaries)
-    print("-------------------( b )-----------------------")
     return {"indicies": indicies, "summaries": summaries}
 
 
@@ -67,10 +63,6 @@ def build_composable_graph():
         summaries,
         max_keywords_per_chunk=50,
     )
-    print("-------------------( 1 )-----------------------")
-    print(indices)
-    print(summaries)
-    print("-------------------( 2 )-----------------------")
     return graph
 
 

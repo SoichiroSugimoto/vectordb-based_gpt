@@ -23,6 +23,7 @@ from llama_index.vector_stores import PineconeVectorStore
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
+load_dotenv('.env')
 
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 

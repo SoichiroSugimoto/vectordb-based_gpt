@@ -33,32 +33,32 @@ def store_article():
 
 @app.route("/post-chat", methods=["POST"])
 def post_chat():
-    if request.is_json:
+    try: 
         data = request.json
         if 'type' in data and data['type'] == 'url_verification':
             return json.dumps( {'challenge': data['challenge'] } )
+        elif request.headers['X-Slack-Retry-Num'] == '1':
+            content = data['event']['text']
+            ts = data['event']['ts']
+            channel_id = data['event']['channel']
+            elements = data['event']['blocks'][0]['elements'][0]['elements']
+            texts = [element['text'] for element in elements if element['type'] == 'text']
+            slack_instance = slack.Slack(os.getenv("SLACK_BOT_TOKEN"))
+            slack_instance.post_reply_message(channel_id, ts, f"The message is received. Please wait while the answer is being generated: \n\n>>>{content}")
+            query_engine = retriever.create_query_engine()
+            query_response = query_engine.query(texts[0])
+            chat_completion = vars(query_response)['response']
+            print(chat_completion)
+            if chat_completion is None:
+                chat_completion = "Sorry, I don't know the answer."
+            slack_instance.post_reply_message(channel_id, ts, f"{chat_completion}")
+            return jsonify({"msg": chat_completion})
         else:
-            try: 
-                data = request.json
-                content = data['event']['text']
-                ts = data['event']['ts']
-                channel_id = data['event']['channel']
-                elements = data['event']['blocks'][0]['elements'][0]['elements']
-                texts = [element['text'] for element in elements if element['type'] == 'text']
-                slack_instance = slack.Slack(os.getenv("SLACK_BOT_TOKEN"))
-                slack_instance.post_reply_message(channel_id, ts, f"The message is received. Please wait while the answer is being generated: \n\n>>>{content}")
-                query_engine = retriever.create_query_engine()
-                print(texts[0])
-                query_response = query_engine.query(texts[0])
-                chat_completion = vars(query_response)['response']
-                print(chat_completion)
-                slack_instance.post_reply_message(channel_id, ts, f"{chat_completion}")
-                return jsonify({"msg": chat_completion})
-            except Exception as e:
-                logger.error(f"An error occurred: {e}")
-                return jsonify({"msg": "An error occurred"}), 500
-    else:
-        return jsonify({"msg": "Invalid content"}), 400
+            return jsonify({"msg": "Retry"})
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+        return jsonify({"msg": "An error occurred"}), 500
+            
 
 @app.route("/delete-index/<int:id>", methods=["DELETE"])
 def delete_index(id):
