@@ -11,13 +11,9 @@ from boto3.dynamodb.conditions import Attr
 
 class DynamoDBTable:
     def __init__(self, table_name, region_name, partition_key_name, sort_key_name):
-        # aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
-        # aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
         self.dynamodb = boto3.resource(
             "dynamodb",
             region_name=region_name,
-            # aws_access_key_id=aws_access_key_id,
-            # aws_secret_access_key=aws_secret_access_key,
         )
         self.table = self.dynamodb.Table(table_name)
         self.partition_key_name = partition_key_name
