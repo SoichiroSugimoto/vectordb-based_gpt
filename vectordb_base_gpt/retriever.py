@@ -9,19 +9,22 @@ from dynamo_db import DynamoDBTable
 from llama_index import (
     VectorStoreIndex,
     SimpleKeywordTableIndex,
-    SimpleDirectoryReader,
+    StringIterableReader,
     LLMPredictor,
     ServiceContext,
 )
 from llama_index.indices.composability.graph import ComposableGraph
 from llama_index.indices.vector_store import GPTVectorStoreIndex
 from langchain.llms.openai import OpenAIChat
-from llama_index.storage.storage_context import StorageContext
 from llama_index.vector_stores import PineconeVectorStore
+from llama_index.llms import OpenAI
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 load_dotenv('.env')
+
+os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def get_index_from_pinecone_ids(ids):
     pinecone_api_key = os.getenv("PINECONE_API_KEY")
@@ -32,7 +35,37 @@ def get_index_from_pinecone_ids(ids):
     index = GPTVectorStoreIndex.from_vector_store(vector_store=vector_store, ids=ids)
     return index
 
+def get_pinecone_ids_from_dynamo_db():
+    ids = []
+    article_table = DynamoDBTable(
+        table_name="Article", region_name="ap-northeast-1", partition_key_name="category_id", sort_key_name="deleted"
+    )
+    records = article_table.query_items(partition_key_prefixes=["001"], sort_key_value=0)
+    if records is not None:
+        for record in records:
+            ids.append(record["pinecone_id"])
+    return ids
 
+def setup_retriever():
+    documents = StringIterableReader().load_data("exec not to store docs, but to setup retriever")
+    llm = OpenAI(temperature=0, model="gpt-4")
+    service_context = ServiceContext.from_defaults(llm=llm)
+    VectorStoreIndex.from_documents(
+            documents=documents,
+            llm_predictor=LLMPredictor(),
+            service_context=service_context
+        )
+    return None
+
+def create_query_engine():
+    setup_retriever()
+    ids = get_pinecone_ids_from_dynamo_db()
+    index = get_index_from_pinecone_ids(ids)
+    query_engine = index.as_query_engine()
+    return query_engine
+
+
+"""" 
 def get_vector_store_index_summary_sets_from_dynamo_db():
     indicies = []
     summaries = []
@@ -77,3 +110,5 @@ def create_query_engine():
         custom_query_engines=custom_query_engines,
     )
     return query_engine
+"""
+    
