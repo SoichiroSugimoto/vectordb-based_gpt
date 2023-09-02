@@ -20,6 +20,7 @@ COLORS = {
     'ERROR': RED
 }
 
+
 class ColoredFormatter(logging.Formatter):
     def __init__(self, msg):
         logging.Formatter.__init__(self, msg)
@@ -30,6 +31,7 @@ class ColoredFormatter(logging.Formatter):
             levelname_color = COLOR_SEQ % (30 + COLORS[levelname]) + levelname + RESET_SEQ
             record.levelname = levelname_color
         return logging.Formatter.format(self, record)
+
 
 # Initialize logging
 logger = logging.getLogger()
@@ -58,6 +60,7 @@ def list_files_in_directory(directory_path):
             logger.removeHandler(h)
         logger.error(f"{directory_path} へのアクセス許可がありません。")
         return None
+
 
 def store_text_files_as_vector(files):
     try:

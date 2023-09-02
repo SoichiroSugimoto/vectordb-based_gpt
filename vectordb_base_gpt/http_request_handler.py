@@ -15,21 +15,26 @@ logger.setLevel(logging.INFO)
 
 app = Flask(__name__)
 
+
 @app.route("/get-list", methods=["GET"])
 def get_list():
     return jsonify({"msg": "get_list method"})
+
 
 @app.route("/get-list/<int:page>", methods=["GET"])
 def get_list_page(page):
     return jsonify({"msg": "get_list_page method"})
 
+
 @app.route("/get-index", methods=["GET"])
 def get_index():
     return jsonify({"msg": "get_index method"})
 
+
 @app.route("/store-article", methods=["POST"])
 def store_article():
     return jsonify({"msg": "store_article method"})
+
 
 @app.route("/post-chat", methods=["POST"])
 def post_chat():
@@ -63,6 +68,7 @@ def post_chat():
 @app.route("/delete-index/<int:id>", methods=["DELETE"])
 def delete_index(id):
     return jsonify({"msg": "delete_index method"})
+
 
 def lambda_handler(event, context):
     result = awsgi.response(app, event, context)

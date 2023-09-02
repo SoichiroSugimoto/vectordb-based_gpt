@@ -26,6 +26,7 @@ load_dotenv('.env')
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+
 def get_index_from_pinecone_ids(ids):
     pinecone_api_key = os.getenv("PINECONE_API_KEY")
     pinecone_environment = os.getenv("PINECONE_ENVIRONMENT")
@@ -34,6 +35,7 @@ def get_index_from_pinecone_ids(ids):
     vector_store = PineconeVectorStore(pinecone.Index(pinecone_index_name))
     index = GPTVectorStoreIndex.from_vector_store(vector_store=vector_store, ids=ids)
     return index
+
 
 def get_pinecone_ids_from_dynamo_db():
     ids = []
@@ -46,6 +48,7 @@ def get_pinecone_ids_from_dynamo_db():
             ids.append(record["pinecone_id"])
     return ids
 
+
 def setup_retriever():
     documents = StringIterableReader().load_data("exec not to store docs, but to setup retriever")
     llm = OpenAI(temperature=0, model="gpt-4")
@@ -56,6 +59,7 @@ def setup_retriever():
             service_context=service_context
         )
     return None
+
 
 def create_query_engine():
     setup_retriever()

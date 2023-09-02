@@ -5,9 +5,9 @@ import ast
 import datetime
 from urllib import parse
 from dotenv import load_dotenv
-
 from boto3.dynamodb.conditions import Key
 from boto3.dynamodb.conditions import Attr
+
 
 class DynamoDBTable:
     def __init__(self, table_name, region_name, partition_key_name, sort_key_name):
@@ -34,7 +34,6 @@ class DynamoDBTable:
         )
         return res["Items"]
 
-    
     # partition_key_prefixes(配列)から始まるパーティションキーを持つアイテムを取得
     def query_items(self, partition_key_prefixes=None, sort_key_value=0):
         results = []
@@ -45,7 +44,6 @@ class DynamoDBTable:
                 )
                 results.extend(response['Items'])
         return results
-
 
     def get_alive_records(self):
         res = self.table.scan(FilterExpression=Attr("deleted").eq(0))
