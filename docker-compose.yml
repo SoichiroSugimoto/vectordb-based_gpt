@@ -1,3 +1,5 @@
+# Build and run the docker image: sudo docker-compose up --build
+# Execute the docker image: docker compose exec app bash
 version: '3'
 services:
   app:
