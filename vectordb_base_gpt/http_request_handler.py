@@ -7,6 +7,7 @@ import logging
 import json
 import storer
 import retriever
+import constants as const
 import pinecone_client as pinecone
 from dynamodb_client import DynamoDBTable
 from urllib import parse
@@ -68,19 +69,20 @@ def post_chat():
         if 'type' in data and data['type'] == 'url_verification':
             return json.dumps( {'challenge': data['challenge'] } )
         elif request.headers['X-Slack-Retry-Num'] == '1':
+            print(data)
             content = data['event']['text']
             ts = data['event']['ts']
             channel_id = data['event']['channel']
             elements = data['event']['blocks'][0]['elements'][0]['elements']
             texts = [element['text'] for element in elements if element['type'] == 'text']
             slack_instance = slack.SlackClient(os.getenv("SLACK_BOT_TOKEN"))
-            slack_instance.post_reply_message(channel_id, ts, f"The message is received. Please wait while the answer is being generated: \n\n>>>{content}")
+            slack_instance.post_reply_message(channel_id, ts, const.MESSAGE_PLEASE_WAITING + f" \n\n>>>{content}")
             query_engine = retriever.create_query_engine()
-            query_response = query_engine.query(texts[0])
+            query_response = query_engine.query(const.FORMATTED_PROMPT_TEXT %texts[0])
             chat_completion = vars(query_response)['response']
             print(chat_completion)
             if chat_completion is None:
-                chat_completion = "Sorry, I don't know the answer."
+                chat_completion = const.MESSAGE_ANSWER_UNGENERATED
             slack_instance.post_reply_message(channel_id, ts, f"{chat_completion}")
             return jsonify({"msg": chat_completion})
         else:
