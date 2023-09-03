@@ -18,7 +18,7 @@ logger.setLevel(logging.INFO)
 app = Flask(__name__)
 
 
-@app.route("/get-list", methods=["GET"])
+@app.route("/index-list", methods=["GET"])
 def get_list():
     try:
         index_data = []
@@ -32,7 +32,7 @@ def get_list():
             partition_key_name="category_id",
             sort_key_name="deleted"
         )
-        records = article_table.query_items(partition_key_prefixes=["001"], sort_key_value=0)
+        records = article_table.get_alive_records()
         if records is not None:
             for record in records:
                 text = pinecone_instance.get_text_from_id(record["pinecone_id"], namespace='')
