@@ -20,7 +20,30 @@ app = Flask(__name__)
 
 @app.route("/get-list", methods=["GET"])
 def get_list():
-    return jsonify({"msg": "get_list method"})
+    try:
+        index_data = []
+        pinecone_instance = pinecone.PineconeClient(
+            os.getenv("PINECONE_API_KEY"),
+            os.getenv("PINECONE_ENVIRONMENT"),
+            os.getenv("PINECONE_INDEX_NAME"))
+        article_table = DynamoDBTable(
+            table_name="Article",
+            region_name="ap-northeast-1",
+            partition_key_name="category_id",
+            sort_key_name="deleted"
+        )
+        records = article_table.query_items(partition_key_prefixes=["001"], sort_key_value=0)
+        if records is not None:
+            for record in records:
+                text = pinecone_instance.get_text_from_id(record["pinecone_id"], namespace='')
+                index_data.append({'category_id': record["category_id"],
+                                    'pinecone_id': record["pinecone_id"],
+                                    'text': text})
+        print(index_data)
+        return (json.dumps(index_data))
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+        return jsonify({"msg": "An error occurred"}), 500
 
 
 @app.route("/get-list/<int:page>", methods=["GET"])
