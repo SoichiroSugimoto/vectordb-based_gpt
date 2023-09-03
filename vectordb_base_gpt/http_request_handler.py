@@ -65,25 +65,26 @@ def store_article():
 @app.route("/post-chat", methods=["POST"])
 def post_chat():
     try: 
-        data = request.json
-        if 'type' in data and data['type'] == 'url_verification':
-            return json.dumps( {'challenge': data['challenge'] } )
+        received_data = request.json
+        if 'type' in received_data and received_data['type'] == 'url_verification':
+            return json.dumps( {'challenge': received_data['challenge'] } )
         elif request.headers['X-Slack-Retry-Num'] == '1':
-            print(data)
-            content = data['event']['text']
-            ts = data['event']['ts']
-            channel_id = data['event']['channel']
-            elements = data['event']['blocks'][0]['elements'][0]['elements']
-            texts = [element['text'] for element in elements if element['type'] == 'text']
-            slack_instance = slack.SlackClient(os.getenv("SLACK_BOT_TOKEN"))
-            slack_instance.post_reply_message(channel_id, ts, const.MESSAGE_PLEASE_WAITING + f" \n\n>>>{content}")
+            print(received_data)
+            slack_instance = slack.SlackClient(os.getenv("SLACK_BOT_TOKEN"), received_data)
+            slack_instance.post_reply_message(
+                slack_instance.channel_id, \
+                slack_instance.ts, \
+                const.MESSAGE_PLEASE_WAITING + f" \n\n>>>{slack_instance.content}")
+            conversation_data = slack_instance.get_conversation_as_array(slack_instance.ts)
+            query_text = const.FORMATTED_PROMPT_TEXT % (slack_instance.texts[0], conversation_data)
+            print(query_text)
             query_engine = retriever.create_query_engine()
-            query_response = query_engine.query(const.FORMATTED_PROMPT_TEXT %texts[0])
+            query_response = query_engine.query(query_text)
             chat_completion = vars(query_response)['response']
             print(chat_completion)
             if chat_completion is None:
                 chat_completion = const.MESSAGE_ANSWER_UNGENERATED
-            slack_instance.post_reply_message(channel_id, ts, f"{chat_completion}")
+            slack_instance.post_reply_message(slack_instance.channel_id, slack_instance.ts, f"{chat_completion}")
             return jsonify({"msg": chat_completion})
         else:
             return jsonify({"msg": "Retry"})
