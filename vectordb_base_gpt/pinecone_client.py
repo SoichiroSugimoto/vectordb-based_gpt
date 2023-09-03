@@ -21,15 +21,3 @@ class PineconeClient:
 
         except Exception as e:
             self.logger.error(f"Error fetch text: {e}")
-
-    # def post_reply_message(self, channel_id, parent_ts, message_text):
-    #     try:
-    #         result = self.client.chat_postMessage(
-    #             channel=channel_id,
-    #             thread_ts=parent_ts,
-    #             text=message_text
-    #         )
-    #         self.logger.info(result)
-
-    #     except SlackApiError as e:
-    #         self.logger.error(f"Error posting message: {e}")
