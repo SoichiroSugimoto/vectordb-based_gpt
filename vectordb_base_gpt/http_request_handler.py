@@ -2,11 +2,13 @@ from flask import Flask, request, jsonify
 import awsgi
 import pkg_resources
 import os
-import slack
+import slack_client as slack
 import logging
 import json
 import storer
 import retriever
+import pinecone_client as pinecone
+from dynamodb_client import DynamoDBTable
 from urllib import parse
 
 logging.basicConfig(level=logging.INFO)
@@ -48,7 +50,7 @@ def post_chat():
             channel_id = data['event']['channel']
             elements = data['event']['blocks'][0]['elements'][0]['elements']
             texts = [element['text'] for element in elements if element['type'] == 'text']
-            slack_instance = slack.Slack(os.getenv("SLACK_BOT_TOKEN"))
+            slack_instance = slack.SlackClient(os.getenv("SLACK_BOT_TOKEN"))
             slack_instance.post_reply_message(channel_id, ts, f"The message is received. Please wait while the answer is being generated: \n\n>>>{content}")
             query_engine = retriever.create_query_engine()
             query_response = query_engine.query(texts[0])
@@ -63,7 +65,7 @@ def post_chat():
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         return jsonify({"msg": "An error occurred"}), 500
-            
+
 
 @app.route("/delete-index/<int:id>", methods=["DELETE"])
 def delete_index(id):

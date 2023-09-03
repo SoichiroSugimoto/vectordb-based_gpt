@@ -4,7 +4,7 @@ import os
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
-class Slack:
+class SlackClient:
     def __init__(self, slack_bot_token):
         self.client = WebClient(token=slack_bot_token)
         self.logger = logging.getLogger(__name__)

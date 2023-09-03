@@ -1,10 +1,10 @@
 import os
 import sys
 import logging
-import pinecone
+import pinecone_client as pinecone
 import openai
 from dotenv import load_dotenv
-from dynamo_db import DynamoDBTable
+from dynamodb_client import DynamoDBTable
 
 from llama_index import (
     VectorStoreIndex,
@@ -28,11 +28,11 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
 def get_index_from_pinecone_ids(ids):
-    pinecone_api_key = os.getenv("PINECONE_API_KEY")
-    pinecone_environment = os.getenv("PINECONE_ENVIRONMENT")
-    pinecone_index_name = os.getenv("PINECONE_INDEX_NAME")
-    pinecone.init(api_key=pinecone_api_key, environment=pinecone_environment)
-    vector_store = PineconeVectorStore(pinecone.Index(pinecone_index_name))
+    pinecone_instance = pinecone.PineconeClient(
+        os.getenv("PINECONE_API_KEY"),
+        os.getenv("PINECONE_ENVIRONMENT"),
+        os.getenv("PINECONE_INDEX_NAME"))
+    vector_store = PineconeVectorStore(pinecone_instance.index)
     index = GPTVectorStoreIndex.from_vector_store(vector_store=vector_store, ids=ids)
     return index
 

@@ -5,7 +5,7 @@ import logging
 import inspect
 import pprint
 from datetime import datetime
-from dynamo_db import DynamoDBTable
+from dynamodb_client import DynamoDBTable
 from dotenv import load_dotenv
 
 from llama_index import (

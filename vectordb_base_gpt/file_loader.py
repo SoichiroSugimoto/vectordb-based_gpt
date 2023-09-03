@@ -2,7 +2,7 @@ import os
 import logging
 import storer
 import retriever
-from dynamo_db import DynamoDBTable
+from dynamodb_client import DynamoDBTable
 from llama_index import SimpleDirectoryReader, StringIterableReader
 
 
