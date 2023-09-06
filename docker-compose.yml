@@ -7,9 +7,9 @@ services:
       context: .
       dockerfile: dev.Dockerfile
     restart: always
-    container_name: 'dev.vectordb_base_gpt'
-    working_dir: '/root/vectordb_base_gpt'
+    container_name: 'dev.vectordb-based_gpt'
+    working_dir: '/root/vectordb-based_gpt'
     tty: true
     volumes:
-      - ./vectordb_base_gpt:/root/vectordb_base_gpt
+      - ./vectordb-based_gpt:/root/vectordb-based_gpt
       - ./data:/root/data
