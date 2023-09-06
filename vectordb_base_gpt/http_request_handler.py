@@ -19,8 +19,8 @@ logger.setLevel(logging.INFO)
 app = Flask(__name__)
 
 
-@app.route("/index-list", methods=["GET"])
-def get_list():
+@app.route("/get-index-list", methods=["GET"])
+def get_index_list():
     try:
         index_data = []
         pinecone_instance = pinecone.PineconeClient(
