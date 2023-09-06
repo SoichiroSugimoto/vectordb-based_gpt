@@ -1,4 +1,4 @@
-# 🐿VectorDB-Based_GPT
+# VectorDB-Based_GPT
 This application offers a set of valuable tools that enable you to perform the following tasks with ease:
 - File loading: Convert text data into vector data and insert it into a vector database.
 - Chatbot creation: Create a query engine using the data stored in the vector database.
@@ -14,17 +14,19 @@ $ docker compose up -d --build
 ```
 
 2. Access the application's container:
-```
+```bash
 $ docker compose exec app bash
 ```
 
 3. Now you can execute Python files within the Docker container.
 
-**File loading**
-```
-$ python file_loader.py
-```
-**Chatbot creation**
-```
-$ python main.py
-```
+- **🗂 File loading**:<br>
+  First, make sure you have a docs directory under the root directory of the project. Then run the following command to load files:
+  ```bash
+  $ python file_loader.py
+  ```
+- **🤖 Chatbot creation**:<br>
+  Run the following command to start the chatbot:
+  ```bash
+  $ python main.py
+  ```
