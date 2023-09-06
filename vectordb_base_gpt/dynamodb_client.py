@@ -11,10 +11,20 @@ from boto3.dynamodb.conditions import Attr
 
 class DynamoDBTable:
     def __init__(self, table_name, region_name, partition_key_name, sort_key_name):
-        self.dynamodb = boto3.resource(
-            "dynamodb",
-            region_name=region_name,
-        )
+        if os.getenv('AWS_EXECUTION_ENV') is None:
+            aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
+            aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+            self.dynamodb = boto3.resource(
+                "dynamodb",
+                region_name=region_name,
+                aws_access_key_id=aws_access_key_id,
+                aws_secret_access_key=aws_secret_access_key
+            )
+        else:
+            self.dynamodb = boto3.resource(
+                "dynamodb",
+                region_name=region_name
+            )
         self.table = self.dynamodb.Table(table_name)
         self.partition_key_name = partition_key_name
         self.sort_key_name = sort_key_name
@@ -47,7 +57,7 @@ class DynamoDBTable:
 
     def get_alive_records(self):
         res = self.table.scan(FilterExpression=Attr("deleted").eq(0))
-        return res["Items"] if "Item" in res else None
+        return res["Items"] if "Items" in res else None
 
     def get_all_items(self):
         res = self.table.scan()

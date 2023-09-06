@@ -5,8 +5,6 @@ import retriever
 
 
 def main():
-    load_dotenv()
-    openai.api_key = os.getenv("OPENAI_API_KEY")
     query_engine = retriever.create_query_engine()
     print("Enter a value (press Ctrl+C to exit)")
     conversation_buffer = []
