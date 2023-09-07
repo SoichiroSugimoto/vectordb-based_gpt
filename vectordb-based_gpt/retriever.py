@@ -37,12 +37,15 @@ def get_index_from_pinecone_ids(ids):
     return index
 
 
-def get_pinecone_ids_from_dynamo_db():
+def get_pinecone_ids_from_dynamo_db(accessibility_ids):
     ids = []
     article_table = DynamoDBTable(
         table_name="Article", region_name="ap-northeast-1", partition_key_name="category_id", sort_key_name="deleted"
     )
-    records = article_table.query_items(partition_key_prefixes=["001"], sort_key_value=0)
+    if accessibility_ids is None:
+        records = article_table.get_alive_records()
+    else:
+        records = article_table.query_items(partition_key_prefixes=accessibility_ids, sort_key_value=0)
     if records is not None:
         for record in records:
             ids.append(record["pinecone_id"])
@@ -61,9 +64,9 @@ def setup_retriever():
     return None
 
 
-def create_query_engine():
+def create_query_engine(accessibility_ids):
     setup_retriever()
-    ids = get_pinecone_ids_from_dynamo_db()
+    ids = get_pinecone_ids_from_dynamo_db(accessibility_ids)
     index = get_index_from_pinecone_ids(ids)
     query_engine = index.as_query_engine()
     return query_engine

@@ -47,11 +47,6 @@ def get_index_list():
         return jsonify({"msg": "An error occurred"}), 500
 
 
-@app.route("/get-list/<int:page>", methods=["GET"])
-def get_list_page(page):
-    return jsonify({"msg": "get_list_page method"})
-
-
 @app.route("/get-index", methods=["GET"])
 def get_index():
     return jsonify({"msg": "get_index method"})
@@ -62,30 +57,47 @@ def store_article():
     return jsonify({"msg": "store_article method"})
 
 
+def handle_chat(received_data, accessibility_ids=None):
+    slack_instance = slack.SlackClient(os.getenv("SLACK_BOT_TOKEN"), received_data)
+    slack_instance.post_reply_message(
+        slack_instance.channel_id, 
+        slack_instance.ts,
+        const.MESSAGE_PLEASE_WAITING + f" \n\n>>>{slack_instance.content}"
+    )
+    conversation_data = slack_instance.get_conversation_as_array(slack_instance.ts)
+    query_text = const.FORMATTED_PROMPT_TEXT % (slack_instance.texts[0], conversation_data)
+    query_engine = retriever.create_query_engine(accessibility_ids)
+    query_response = query_engine.query(query_text)
+    chat_completion = vars(query_response)['response']
+    if chat_completion is None:
+        chat_completion = const.MESSAGE_ANSWER_UNGENERATED
+    slack_instance.post_reply_message(slack_instance.channel_id, slack_instance.ts, f"{chat_completion}")
+    return jsonify({"msg": chat_completion})
+
+
 @app.route("/post-chat", methods=["POST"])
 def post_chat():
-    try: 
+    try:
         received_data = request.json
         if 'type' in received_data and received_data['type'] == 'url_verification':
-            return json.dumps( {'challenge': received_data['challenge'] } )
+            return json.dumps({'challenge': received_data['challenge']})
         elif request.headers['X-Slack-Retry-Num'] == '1':
-            print(received_data)
-            slack_instance = slack.SlackClient(os.getenv("SLACK_BOT_TOKEN"), received_data)
-            slack_instance.post_reply_message(
-                slack_instance.channel_id, \
-                slack_instance.ts, \
-                const.MESSAGE_PLEASE_WAITING + f" \n\n>>>{slack_instance.content}")
-            conversation_data = slack_instance.get_conversation_as_array(slack_instance.ts)
-            query_text = const.FORMATTED_PROMPT_TEXT % (slack_instance.texts[0], conversation_data)
-            print(query_text)
-            query_engine = retriever.create_query_engine()
-            query_response = query_engine.query(query_text)
-            chat_completion = vars(query_response)['response']
-            print(chat_completion)
-            if chat_completion is None:
-                chat_completion = const.MESSAGE_ANSWER_UNGENERATED
-            slack_instance.post_reply_message(slack_instance.channel_id, slack_instance.ts, f"{chat_completion}")
-            return jsonify({"msg": chat_completion})
+            return handle_chat(received_data)
+        else:
+            return jsonify({"msg": "Retry"})
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+        return jsonify({"msg": "An error occurred"}), 500
+
+
+@app.route("/post-chat/<string:accessibility_ids>", methods=["POST"])
+def post_chat_with_accessibility_ids(accessibility_ids):
+    try:
+        received_data = request.json
+        if 'type' in received_data and received_data['type'] == 'url_verification':
+            return json.dumps({'challenge': received_data['challenge']})
+        elif request.headers['X-Slack-Retry-Num'] == '1':
+            return handle_chat(received_data, accessibility_ids.split(','))
         else:
             return jsonify({"msg": "Retry"})
     except Exception as e:
