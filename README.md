@@ -21,7 +21,7 @@ $ docker compose exec app bash
 3. Now you can execute Python files within the Docker container.
 
 - **File loading 🗂**:<br>
-  First, make sure you have a docs directory under the root directory of the project. Then run the following command to load files:
+  First, make sure you have a `data` directory under the `root` directory of the project. Then run the following command to load files:
   ```bash
   $ python file_loader.py
   ```
