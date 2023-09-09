@@ -27,29 +27,14 @@ os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
-def get_index_from_pinecone_ids(ids):
+def create_index_from_pinecone(namespace):
     pinecone_instance = pinecone.PineconeClient(
         os.getenv("PINECONE_API_KEY"),
         os.getenv("PINECONE_ENVIRONMENT"),
         os.getenv("PINECONE_INDEX_NAME"))
-    vector_store = PineconeVectorStore(pinecone_instance.index)
-    index = GPTVectorStoreIndex.from_vector_store(vector_store=vector_store, ids=ids)
+    vector_store = PineconeVectorStore(pinecone_instance.index, namespace=namespace)
+    index = GPTVectorStoreIndex.from_vector_store(vector_store=vector_store)
     return index
-
-
-def get_pinecone_ids_from_dynamo_db(accessibility_ids):
-    ids = []
-    article_table = DynamoDBTable(
-        table_name="Article", region_name="ap-northeast-1", partition_key_name="category_id", sort_key_name="deleted"
-    )
-    if accessibility_ids is None:
-        records = article_table.get_alive_records()
-    else:
-        records = article_table.query_items(partition_key_prefixes=accessibility_ids, sort_key_value=0)
-    if records is not None:
-        for record in records:
-            ids.append(record["pinecone_id"])
-    return ids
 
 
 def setup_retriever():
@@ -66,13 +51,27 @@ def setup_retriever():
 
 def create_query_engine(accessibility_ids):
     setup_retriever()
-    ids = get_pinecone_ids_from_dynamo_db(accessibility_ids)
-    index = get_index_from_pinecone_ids(ids)
+    index = create_index_from_pinecone(namespace=accessibility_ids[0])
     query_engine = index.as_query_engine()
     return query_engine
 
 
-"""" 
+""""
+def get_pinecone_ids_from_dynamo_db(accessibility_ids):
+    ids = []
+    article_table = DynamoDBTable(
+        table_name="Article", region_name="ap-northeast-1", partition_key_name="category_id", sort_key_name="deleted"
+    )
+    if accessibility_ids is None:
+        records = article_table.get_alive_records()
+    else:
+        records = article_table.query_items(partition_key_prefixes=accessibility_ids, sort_key_value=0)
+    if records is not None:
+        for record in records:
+            ids.append(record["pinecone_id"])
+    return ids
+
+
 def get_vector_store_index_summary_sets_from_dynamo_db():
     indicies = []
     summaries = []
@@ -118,4 +117,3 @@ def create_query_engine():
     )
     return query_engine
 """
-    

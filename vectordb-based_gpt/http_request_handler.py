@@ -36,7 +36,9 @@ def get_index_list():
         records = article_table.get_alive_records()
         if records is not None:
             for record in records:
-                text = pinecone_instance.get_text_from_id(record["pinecone_id"], namespace='')
+                text = pinecone_instance.get_text_from_id(
+                    record["pinecone_id"], 
+                    namespace=record["category_id"].split('#')[0])
                 index_data.append({'category_id': record["category_id"],
                                     'pinecone_id': record["pinecone_id"],
                                     'text': text})

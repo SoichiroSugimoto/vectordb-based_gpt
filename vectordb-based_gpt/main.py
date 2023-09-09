@@ -1,11 +1,17 @@
 from dotenv import load_dotenv
 import os
+import sys
 import openai
 import retriever
 
+try:
+    accessibility_ids = [sys.argv[1]]
+except IndexError:
+    accessibility_ids = ["001"]
+
 
 def main():
-    query_engine = retriever.create_query_engine()
+    query_engine = retriever.create_query_engine(accessibility_ids)
     print("Enter a value (press Ctrl+C to exit)")
     conversation_buffer = []
     while True:
