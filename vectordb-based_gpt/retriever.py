@@ -51,7 +51,10 @@ def setup_retriever():
 
 def create_query_engine(accessibility_ids):
     setup_retriever()
-    index = create_index_from_pinecone(namespace=accessibility_ids[0])
+    if accessibility_ids is None:
+        index = create_index_from_pinecone(namespace="")
+    else:
+        index = create_index_from_pinecone(namespace=accessibility_ids[0])
     query_engine = index.as_query_engine()
     return query_engine
 

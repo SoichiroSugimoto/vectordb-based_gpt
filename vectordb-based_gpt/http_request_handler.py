@@ -19,8 +19,8 @@ logger.setLevel(logging.INFO)
 app = Flask(__name__)
 
 
-@app.route("/get-index-list", methods=["GET"])
-def get_index_list():
+@app.route("/vector-data-list", methods=["GET"])
+def get_vector_data_list():
     try:
         index_data = []
         pinecone_instance = pinecone.PineconeClient(
@@ -49,8 +49,8 @@ def get_index_list():
         return jsonify({"msg": "An error occurred"}), 500
 
 
-@app.route("/get-index", methods=["GET"])
-def get_index():
+@app.route("/vector-data", methods=["GET"])
+def get_vector_data():
     return jsonify({"msg": "get_index method"})
 
 
@@ -77,8 +77,8 @@ def handle_chat(received_data, accessibility_ids=None):
     return jsonify({"msg": chat_completion})
 
 
-@app.route("/post-chat", methods=["POST"])
-def post_chat():
+@app.route("/slack-chat", methods=["POST"])
+def slack_chat_query():
     try:
         received_data = request.json
         if 'type' in received_data and received_data['type'] == 'url_verification':
@@ -92,8 +92,8 @@ def post_chat():
         return jsonify({"msg": "An error occurred"}), 500
 
 
-@app.route("/post-chat/<string:accessibility_ids>", methods=["POST"])
-def post_chat_with_accessibility_ids(accessibility_ids):
+@app.route("/slack-chat/<string:accessibility_ids>", methods=["POST"])
+def slack_chat_query_with_accessibility_ids(accessibility_ids):
     try:
         received_data = request.json
         if 'type' in received_data and received_data['type'] == 'url_verification':
