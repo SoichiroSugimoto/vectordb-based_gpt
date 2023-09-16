@@ -21,3 +21,24 @@ class PineconeClient:
 
         except Exception as e:
             self.logger.error(f"Error fetch text: {e}")
+
+    def fetch_vector_data_with_id(self, ids, namespace=''):
+        try:
+            response = self.index.fetch(
+                ids=ids,
+                namespace=namespace
+            )
+            return (response)
+
+        except Exception as e:
+            self.logger.error(f"Error fetch text: {e}")
+
+    def delete_vector_data_with_id(self, id, namespace=''):
+        try:
+            response = self.index.delete(
+                ids=[id],
+                namespace=namespace
+            )
+            return (response)
+        except Exception as e:
+            self.logger.error(f"Error delete vector data: {e}")

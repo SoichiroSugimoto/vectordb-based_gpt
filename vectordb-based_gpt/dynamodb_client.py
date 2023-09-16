@@ -36,6 +36,16 @@ class DynamoDBTable:
     def get_item(self, key):
         res = self.table.get_item(Key=key)
         return res["Item"] if "Item" in res else None
+    
+    def delete_item(self, partition_key_value, sort_key_value=None):
+        key = {self.partition_key_name: partition_key_value}
+        if self.sort_key_name:
+            if sort_key_value is None:
+                raise ValueError("Sort key value must be provided for tables with a sort key")
+            key[self.sort_key_name] = sort_key_value
+            
+        res = self.table.delete_item(Key=key)
+        return res
 
     def get_items_beginning_with(self, partition_key, sort_key_prefix):
         res = self.table.query(

@@ -12,6 +12,7 @@ from llama_index import (
     VectorStoreIndex,
     SimpleKeywordTableIndex,
     SimpleDirectoryReader,
+    StringIterableReader,
     LLMPredictor,
     ServiceContext,
 )
@@ -95,3 +96,8 @@ def create_index(article_summary, article, accessibility_id):
         pinecone_id = vars(node)["id_"]
         category_id = f"{accessibility_id}#{date_string}#{i:03}"
         dynamodb_inserter.insert_to_dynamodb(pinecone_id, article_summary, category_id)
+
+
+def create_index_from_string(article_summary, text, accessibility_id):
+    article = StringIterableReader().load_data(texts=[text])
+    create_index(article_summary, article, accessibility_id)
