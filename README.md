@@ -15,7 +15,7 @@ It also allows you to set this accessibility of data for each user by mapping it
 | POST | /chat/{accessibilityIds} | query a chat content to get a completion | - chat_content: text content as a question |
 | DELETE | /vector-data | delete the data this application uses as reference | - category_id: unique id of an article |
 | POST | /slack-chat | query a chat content to get a completion via Slack | |
-| POST | /slack-chat/{accessibilityIds} | query a chat content to get a completion with a limited data via Slack | |
+| POST | /slack-chat/{accessibilityIds} | query a chat content to get a completion with limited data via Slack | |
 
 This application also provides a local execution way.
 To set up and run the project, execute the following Docker commands:
