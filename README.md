@@ -88,3 +88,8 @@ The OpenAI API is used for natural language understanding and other AI-powered f
 **Environment Variables:**
 
 - OPENAI_API_KEY: OpenAI API Key
+
+<br><br>
+
+## 日本語記事
+https://qiita.com/nosandone/items/8311db2992bf138f8fc8
