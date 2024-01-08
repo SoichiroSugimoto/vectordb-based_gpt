@@ -4,11 +4,6 @@ import sys
 import openai
 import retriever
 
-try:
-    accessibility_ids = [sys.argv[1]]
-except IndexError:
-    accessibility_ids = ["001"]
-
 
 def main():
     query_engine = retriever.create_query_engine(accessibility_ids)

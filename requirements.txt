@@ -1,4 +1,4 @@
-git+https://github.com/SoichiroSugimoto/llama_index.git@20230812-original
+llama_index
 aws-wsgi==0.2.7
 boto3>=1.28.30
 Flask>=2.3.2

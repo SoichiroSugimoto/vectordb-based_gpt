@@ -9,7 +9,6 @@ import storer
 import retriever
 import constants as const
 import pinecone_client as pinecone
-from dynamodb_client import DynamoDBTable
 from urllib import parse
 
 logging.basicConfig(level=logging.INFO)
@@ -25,29 +24,6 @@ def validate_request(req, required_params):
     if empty_params:
         return False, f"Empty or None values for parameters: {', '.join(empty_params)}"
     return True, ""
-
-
-def group_by_namespace(dynamodb_data):
-    result = []
-    namespace_to_index = {}
-    for item in dynamodb_data:
-        namespace = item['category_id'].split('#')[0]
-        pinecone_id = item['pinecone_id']
-        if namespace in namespace_to_index:
-            index = namespace_to_index[namespace]
-            result[index]['pinecone_ids'].append(pinecone_id)
-        else:
-            new_dict = {'namespace': namespace, 'pinecone_ids': [pinecone_id]}
-            result.append(new_dict)
-            namespace_to_index[namespace] = len(result) - 1
-    return (result)
-
-
-def get_category_id_with_pinecone_id(dynamodb_data, pinecone_id):
-    for item in dynamodb_data:
-        if item['pinecone_id'] == pinecone_id:
-            return (item['category_id'])
-    return (None)
 
 
 def handle_slack_chat(received_data, accessibility_ids=None):
@@ -88,40 +64,11 @@ def get_vector_data_list():
             os.getenv("PINECONE_API_KEY"),
             os.getenv("PINECONE_ENVIRONMENT"),
             os.getenv("PINECONE_INDEX_NAME"))
-        article_table = DynamoDBTable(
-            table_name="Article",
-            region_name="ap-northeast-1",
-            partition_key_name="category_id",
-            sort_key_name="deleted"
-        )
-        records = article_table.get_alive_records()
-        if records is not None:
-            namespace_groups = group_by_namespace(records)
-            for namespace_group in namespace_groups:
-                vector_data = pinecone_instance.fetch_vector_data_with_id(
-                    namespace_group['pinecone_ids'], 
-                    namespace=namespace_group['namespace'])
-                for pinecone_id in namespace_group['pinecone_ids']:
-                    category_id = get_category_id_with_pinecone_id(
-                        records, pinecone_id)
-                    parsed_vector_data = json.loads(
-                        vector_data
-                        ['vectors'][pinecone_id]['metadata']['_node_content'])
-                    text = parsed_vector_data['text']
-                    index_data.append({
-                        'category_id': category_id,
-                        'pinecone_id': pinecone_id,
-                        'text': text})
         print(index_data)
         return (json.dumps(index_data))
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         return jsonify({"msg": f"An error occurred. {e}"}), 500
-
-
-@app.route("/vector-data", methods=["GET"])
-def get_vector_data():
-    return jsonify({"msg": "get_index method"})
 
 
 @app.route("/store-article/<string:accessibility_ids>", methods=["POST"])
@@ -205,17 +152,8 @@ def delete_vector_data():
             os.getenv("PINECONE_API_KEY"),
             os.getenv("PINECONE_ENVIRONMENT"),
             os.getenv("PINECONE_INDEX_NAME"))
-        article_table = DynamoDBTable(
-            table_name="Article",
-            region_name="ap-northeast-1",
-            partition_key_name="category_id",
-            sort_key_name="deleted"
-        )
-        dynamodb_response = article_table.delete_item(
-            partition_key_value=category_id, sort_key_value=0)
-        pinecone_response = pinecone_instance.delete_vector_data_with_id(
+        pinecone_instance.delete_vector_data_with_id(
             category_id, namespace=str(category_id).split('#')[0])
-        return jsonify({"msg": f"{dynamodb_response}  {pinecone_response}"}), 200
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         return jsonify({"msg": "An error occurred"}), 500

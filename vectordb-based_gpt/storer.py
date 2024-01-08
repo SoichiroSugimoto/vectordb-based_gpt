@@ -5,7 +5,6 @@ import logging
 import inspect
 import pprint
 from datetime import datetime
-from dynamodb_client import DynamoDBTable
 from dotenv import load_dotenv
 
 from llama_index import (
@@ -58,44 +57,12 @@ class IndexCreator:
         return nodes
 
 
-class DynamoDBInserter:
-    def __init__(self, table_name, partition_key_name, sort_key_name):
-        self.dynamodb = DynamoDBTable(
-            table_name=table_name,
-            region_name="ap-northeast-1",
-            partition_key_name=partition_key_name,
-            sort_key_name=sort_key_name,
-        )
-
-    def _create_item(self, pinecone_id, article_summary, category_id):
-        return {
-            "pinecone_id": pinecone_id,
-            "summary": article_summary,
-            "category_id": category_id,
-            "deleted": 0,
-            "created_by": inspect.currentframe().f_code.co_name,
-            "updated_by": inspect.currentframe().f_code.co_name,
-        }
-
-    def insert_to_dynamodb(self, pinecone_id, article_summary, category_id):
-        item = self._create_item(pinecone_id, article_summary, category_id)
-        self.dynamodb.put_item(item)
-
-
 def create_index(article_summary, article, accessibility_id):
     pinecone_index_name = os.getenv("PINECONE_INDEX_NAME")
     pinecone_environment = os.getenv("PINECONE_ENVIRONMENT")
     model_name = "text-embedding-ada-002"
     index_creator = IndexCreator(pinecone_index_name, pinecone_environment, model_name)
-    pinecone_nodes = index_creator.insert_to_pinecone(article, accessibility_id)
-    dynamodb_inserter = DynamoDBInserter("Article", "category_id", "deleted")
-
-    for i, node in enumerate(pinecone_nodes, start=1):
-        now = datetime.now()
-        date_string = now.strftime("%Y%m%d%H%M%S")
-        pinecone_id = vars(node)["id_"]
-        category_id = f"{accessibility_id}#{date_string}#{i:03}"
-        dynamodb_inserter.insert_to_dynamodb(pinecone_id, article_summary, category_id)
+    index_creator.insert_to_pinecone(article, accessibility_id)
 
 
 def create_index_from_string(article_summary, text, accessibility_id):
