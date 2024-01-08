@@ -62,13 +62,13 @@ def list_files_in_directory(directory_path):
         return None
 
 
-def store_text_files_as_vector(files, accessibility_id="001"):
+def store_text_files_as_vector(files):
     try:
         for file in files:
             article_summary = f"Artile about {file.replace('.txt', '')}"
             print(article_summary)
             article = SimpleDirectoryReader(input_files=[f"../data/{file}"]).load_data()
-            storer.create_index(article_summary, article, accessibility_id)
+            storer.create_index(article_summary, article)
     except Exception as e:
         for h in logger.handlers[:-1]:
             logger.removeHandler(h)
@@ -77,10 +77,6 @@ def store_text_files_as_vector(files, accessibility_id="001"):
 
 
 directory_path = '../data'
-try:
-    accessibility_id = sys.argv[1]
-except IndexError:
-    accessibility_id = "001"
 files = list_files_in_directory(directory_path)
 if files is not None:
-    store_text_files_as_vector(files, accessibility_id)
+    store_text_files_as_vector(files)

@@ -26,7 +26,7 @@ def validate_request(req, required_params):
     return True, ""
 
 
-def handle_slack_chat(received_data, accessibility_ids=None):
+def handle_slack_chat(received_data):
     slack_instance = slack.SlackClient(os.getenv("SLACK_BOT_TOKEN"), received_data)
     slack_instance.post_reply_message(
         slack_instance.channel_id, 
@@ -35,7 +35,7 @@ def handle_slack_chat(received_data, accessibility_ids=None):
     )
     conversation_data = slack_instance.get_conversation_as_array(slack_instance.ts)
     query_text = const.FORMATTED_PROMPT_TEXT % (slack_instance.texts[0], conversation_data)
-    query_engine = retriever.create_query_engine(accessibility_ids)
+    query_engine = retriever.create_query_engine()
     query_response = query_engine.query(query_text)
     chat_completion = vars(query_response)['response']
     if chat_completion is None:
@@ -44,8 +44,8 @@ def handle_slack_chat(received_data, accessibility_ids=None):
     return (chat_completion)
 
 
-def handle_chat(chat_content, accessibility_ids=None):
-    query_engine = retriever.create_query_engine(accessibility_ids)
+def handle_chat(chat_content):
+    query_engine = retriever.create_query_engine()
     query_response = query_engine.query(chat_content)
     chat_completion = vars(query_response)['response']
     if chat_completion is None:
@@ -71,8 +71,8 @@ def get_vector_data_list():
         return jsonify({"msg": f"An error occurred. {e}"}), 500
 
 
-@app.route("/store-article/<string:accessibility_ids>", methods=["POST"])
-def store_article(accessibility_ids):
+@app.route("/store-article", methods=["POST"])
+def store_article():
     try:
         req = request.args
         required_params = ["text", "title"]
@@ -84,7 +84,7 @@ def store_article(accessibility_ids):
         article_summary = f"Article about {title}"
         print(article_summary)
         storer.create_index_from_string(
-            article_summary, text, accessibility_ids.split(',')[0])
+            article_summary, text)
         return jsonify({"msg": "Article stored successfully"}), 200
     except Exception as e:
         logger.error(f"An error occurred: {e}")
@@ -107,14 +107,14 @@ def slack_chat_query():
         return jsonify({"msg": "An error occurred"}), 500
 
 
-@app.route("/slack-chat/<string:accessibility_ids>", methods=["POST"])
-def slack_chat_query_with_accessibility_ids(accessibility_ids):
+@app.route("/slack-chat", methods=["POST"])
+def slack_chat_query():
     try:
         received_data = request.json
         if 'type' in received_data and received_data['type'] == 'url_verification':
             return json.dumps({'challenge': received_data['challenge']})
         elif request.headers['X-Slack-Retry-Num'] == '1':
-            chat_completion = handle_slack_chat(received_data, accessibility_ids.split(','))
+            chat_completion = handle_slack_chat(received_data)
             return jsonify({"msg": chat_completion})
         else:
             return jsonify({"msg": "Retry"})
@@ -123,8 +123,8 @@ def slack_chat_query_with_accessibility_ids(accessibility_ids):
         return jsonify({"msg": "An error occurred"}), 500
     
 
-@app.route("/chat/<string:accessibility_ids>", methods=["POST"])
-def chat_query_with_accessibility_ids(accessibility_ids):
+@app.route("/chat", methods=["POST"])
+def chat_query():
     try:
         req = request.args
         required_params = ["chat_content"]
@@ -132,7 +132,7 @@ def chat_query_with_accessibility_ids(accessibility_ids):
         if not is_valid:
             return jsonify({"msg": validation_msg}), 400
         chat_content = req.get("chat_content")
-        chat_completion = handle_chat(chat_content, accessibility_ids.split(','))
+        chat_completion = handle_chat(chat_content)
         return jsonify({"chat_completion": chat_completion}), 200
     except Exception as e:
         logger.error(f"An error occurred: {e}")

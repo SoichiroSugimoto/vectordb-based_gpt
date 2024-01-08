@@ -1,7 +1,7 @@
 import os
 import sys
 import logging
-import pinecone_client as pinecone
+from pinecone_client import PineconeClient
 import openai
 from dotenv import load_dotenv
 
@@ -26,29 +26,18 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
 def create_index_from_pinecone(namespace):
-    pinecone_instance = pinecone.PineconeClient(
+    pinecone_instance = PineconeClient(
         os.getenv("PINECONE_API_KEY"),
         os.getenv("PINECONE_ENVIRONMENT"),
         os.getenv("PINECONE_INDEX_NAME"))
-    vector_store = PineconeVectorStore(pinecone_instance.index, namespace=namespace)
-    index = GPTVectorStoreIndex.from_vector_store(vector_store=vector_store)
+    vector_store = PineconeVectorStore(pinecone_instance.index)
+    llm = OpenAI(temperature=0, model="gpt-4")
+    service_context = ServiceContext.from_defaults(llm=llm)
+    index = GPTVectorStoreIndex.from_vector_store(vector_store=vector_store, service_context=service_context)
     return index
 
 
-def setup_retriever():
-    documents = StringIterableReader().load_data("exec not to store docs, but to setup retriever")
-    llm = OpenAI(temperature=0, model="gpt-4")
-    service_context = ServiceContext.from_defaults(llm=llm)
-    VectorStoreIndex.from_documents(
-            documents=documents,
-            llm_predictor=LLMPredictor(),
-            service_context=service_context
-        )
-    return None
-
-
-def create_query_engine():
-    setup_retriever()
+def create_query_engine(similarity_top_k=1):
     index = create_index_from_pinecone()
-    query_engine = index.as_query_engine()
+    query_engine = index.as_query_engine(similarity_top_k=1)
     return query_engine

@@ -6,7 +6,7 @@ import retriever
 
 
 def main():
-    query_engine = retriever.create_query_engine(accessibility_ids)
+    query_engine = retriever.create_query_engine(1)
     print("Enter a value (press Ctrl+C to exit)")
     conversation_buffer = []
     while True:

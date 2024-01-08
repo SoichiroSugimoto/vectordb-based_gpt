@@ -34,11 +34,10 @@ class IndexCreator:
         self.service_context = ServiceContext.from_defaults(llm=self.llm)
 
     # ベクトルデータの保存先を作成
-    def _create_vector_store(self, accessibility_id="001"):
+    def _create_vector_store(self):
         return PineconeVectorStore(
             index_name=self.pinecone_index_name,
             environment=self.pinecone_environment,
-            namespace=accessibility_id
         )
     
     # ベクトルデータを作成、保存
@@ -50,21 +49,21 @@ class IndexCreator:
             service_context=self.service_context,
         )
 
-    def insert_to_pinecone(self, article, accessibility_id="001"):
-        vector_store = self._create_vector_store(accessibility_id)
+    def insert_to_pinecone(self, article):
+        vector_store = self._create_vector_store()
         vector_store_index = self._create_vector_store_index(article, vector_store)
         nodes = vars(vector_store_index)['_nodes']
         return nodes
 
 
-def create_index(article_summary, article, accessibility_id):
+def create_index(article_summary, article):
     pinecone_index_name = os.getenv("PINECONE_INDEX_NAME")
     pinecone_environment = os.getenv("PINECONE_ENVIRONMENT")
     model_name = "text-embedding-ada-002"
     index_creator = IndexCreator(pinecone_index_name, pinecone_environment, model_name)
-    index_creator.insert_to_pinecone(article, accessibility_id)
+    index_creator.insert_to_pinecone(article)
 
 
-def create_index_from_string(article_summary, text, accessibility_id):
+def create_index_from_string(article_summary, text):
     article = StringIterableReader().load_data(texts=[text])
-    create_index(article_summary, article, accessibility_id)
+    create_index(article_summary, article)
