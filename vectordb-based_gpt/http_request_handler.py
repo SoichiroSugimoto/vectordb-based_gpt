@@ -2,13 +2,12 @@ from flask import Flask, request, jsonify
 import awsgi
 import pkg_resources
 import os
-import slack_client as slack
 import logging
 import json
-import storer
 import retriever
 import constants as const
-import pinecone_client as pinecone
+from tools.slack_client import SlackClient
+from tools.pinecone_client import PineconeClient
 from urllib import parse
 
 logging.basicConfig(level=logging.INFO)
@@ -27,7 +26,7 @@ def validate_request(req, required_params):
 
 
 def handle_slack_chat(received_data):
-    slack_instance = slack.SlackClient(os.getenv("SLACK_BOT_TOKEN"), received_data)
+    slack_instance = SlackClient(os.getenv("SLACK_BOT_TOKEN"), received_data)
     slack_instance.post_reply_message(
         slack_instance.channel_id, 
         slack_instance.ts,
@@ -37,7 +36,9 @@ def handle_slack_chat(received_data):
     query_text = const.FORMATTED_PROMPT_TEXT % (slack_instance.texts[0], conversation_data)
     query_engine = retriever.create_query_engine()
     query_response = query_engine.query(query_text)
-    chat_completion = vars(query_response)['response']
+    chat_response = retriever.get_chat_response(query_response)
+    reference_urls = retriever.get_reference_urls(query_response)
+    chat_completion = chat_response + "\n\n" + const.REFERENCE_GUIDE_TEXT + "\n" + reference_urls.replace('- ', '• ')
     if chat_completion is None:
         chat_completion = const.MESSAGE_ANSWER_UNGENERATED
     slack_instance.post_reply_message(slack_instance.channel_id, slack_instance.ts, f"{chat_completion}")
@@ -60,7 +61,7 @@ app = Flask(__name__)
 def get_vector_data_list():
     try:
         index_data = []
-        pinecone_instance = pinecone.PineconeClient(
+        pinecone_instance = PineconeClient(
             os.getenv("PINECONE_API_KEY"),
             os.getenv("PINECONE_ENVIRONMENT"),
             os.getenv("PINECONE_INDEX_NAME"))
@@ -69,42 +70,6 @@ def get_vector_data_list():
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         return jsonify({"msg": f"An error occurred. {e}"}), 500
-
-
-@app.route("/store-article", methods=["POST"])
-def store_article():
-    try:
-        req = request.args
-        required_params = ["text", "title"]
-        is_valid, validation_msg = validate_request(req, required_params)
-        if not is_valid:
-            return jsonify({"msg": validation_msg}), 400
-        text = req.get("text")
-        title = req.get("title")
-        article_summary = f"Article about {title}"
-        print(article_summary)
-        storer.create_index_from_string(
-            article_summary, text)
-        return jsonify({"msg": "Article stored successfully"}), 200
-    except Exception as e:
-        logger.error(f"An error occurred: {e}")
-        return jsonify({"msg": "An error occurred"}), 500
-
-
-@app.route("/slack-chat", methods=["POST"])
-def slack_chat_query():
-    try:
-        received_data = request.json
-        if 'type' in received_data and received_data['type'] == 'url_verification':
-            return json.dumps({'challenge': received_data['challenge']})
-        elif request.headers['X-Slack-Retry-Num'] == '1':
-            chat_completion = handle_slack_chat(received_data)
-            return jsonify({"msg": chat_completion})
-        else:
-            return jsonify({"msg": "Retry"})
-    except Exception as e:
-        logger.error(f"An error occurred: {e}")
-        return jsonify({"msg": "An error occurred"}), 500
 
 
 @app.route("/slack-chat", methods=["POST"])

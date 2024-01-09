@@ -7,7 +7,7 @@ RUN yum -y install vim-enhanced git
 COPY requirements.txt .
 RUN pip install --upgrade pip setuptools wheel
 RUN pip install -r requirements.txt
-COPY vectordb-based_gpt/* .
+COPY vectordb-based_gpt .
 
 WORKDIR .
 CMD [ "http_request_handler.lambda_handler" ]
