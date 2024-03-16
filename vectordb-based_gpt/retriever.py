@@ -18,6 +18,7 @@ load_dotenv('.env')
 
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 openai.api_key = os.getenv("OPENAI_API_KEY")
+notion_page_path = os.getenv("NOTION_PAGE_PATH")
 
 
 def create_index_from_pinecone():
@@ -54,6 +55,6 @@ def get_reference_urls(query_response):
         if metadata:
             page_id = metadata.get('page_id')
             if page_id is not None:
-                reference_urls += f"- https://www.notion.so/{page_id}\n"
+                reference_urls += f"- {notion_page_path}{page_id}\n"
 
     return reference_urls
