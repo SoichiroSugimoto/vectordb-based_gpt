@@ -27,11 +27,6 @@ def validate_request(req, required_params):
 
 def handle_slack_chat(received_data):
     slack_instance = SlackClient(os.getenv("SLACK_BOT_TOKEN"), received_data)
-    slack_instance.post_reply_message(
-        slack_instance.channel_id, 
-        slack_instance.ts,
-        const.MESSAGE_PLEASE_WAITING + f" \n\n>>>{slack_instance.content}"
-    )
     conversation_data = slack_instance.get_conversation_as_array(slack_instance.ts)
     query_text = const.FORMATTED_PROMPT_TEXT % (slack_instance.texts[0], conversation_data)
     query_engine = retriever.create_query_engine()
