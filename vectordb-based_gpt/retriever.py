@@ -5,11 +5,11 @@ from tools.pinecone_client import PineconeClient
 import openai
 from dotenv import load_dotenv
 
-from llama_index import ServiceContext
-from llama_index.indices.vector_store import GPTVectorStoreIndex
+from llama_index.legacy.service_context import ServiceContext
+from llama_index.legacy.indices import GPTVectorStoreIndex
 from langchain_community.chat_models import ChatOpenAI
-from llama_index.vector_stores import PineconeVectorStore
-from llama_index.llms import OpenAI
+from llama_index.legacy.vector_stores.pinecone import PineconeVectorStore
+from llama_index.legacy.llms.openai import OpenAI
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 # logging.basicConfig(stream=sys.stdout, level=logging.ERROR)
@@ -24,7 +24,6 @@ notion_page_path = os.getenv("NOTION_PAGE_PATH")
 def create_index_from_pinecone():
     pinecone_instance = PineconeClient(
         os.getenv("PINECONE_API_KEY"),
-        os.getenv("PINECONE_ENVIRONMENT"),
         os.getenv("PINECONE_INDEX_NAME"))
     vector_store = PineconeVectorStore(pinecone_instance.index)
     llm = OpenAI(temperature=0, model="gpt-4")
@@ -40,7 +39,12 @@ def create_query_engine(similarity_top_k=1):
 
 
 def get_chat_response(query_response):
-    return vars(query_response)['response']
+    score = vars(vars(query_response)['source_nodes'][0])['score']
+    logging.info(f"Score: {score}")
+    if score < float(os.getenv("THRESHOLD_SCORE")):
+        return None
+    else:
+        return vars(query_response)['response']
 
 
 def get_reference_urls(query_response):
@@ -48,7 +52,7 @@ def get_reference_urls(query_response):
 
     source_nodes = vars(query_response).get('source_nodes')
     if not source_nodes:
-        return reference_urls
+        return None
     for source_node in source_nodes:
         node = vars(source_node).get('node')
         metadata = vars(node).get('metadata')
