@@ -7,6 +7,7 @@ You can use Notion as reference data store.
 - OpenAI API Key
 - Pinecone API Key
 - Notion Integration Secret
+- Slack Bot TOken
 
 
 ## Preprocessing
@@ -25,9 +26,12 @@ $ docker compose exec vectordb-based_gpt-local bash
 
 ### Slack
 deployed on AWS environment.
+```
+make deploy
+```
 
 
-## 🏗 System Architecture / Tech Stack
+## System Architecture / Tech Stack
 This application relies on several key technologies for its operation:<br>
 
 ### ■ AWS Lambda
@@ -54,20 +58,3 @@ Pinecone is used for vector databases to store vector data made from text data.
 - PINECONE_INDEX_NAME: The name of your Pinecone project
   
 <br>
-
-## Third-Party Integrations
-This application integrates with various third-party services for enhanced functionalities:
-
-### ■ Slack API
-The Slack API is used for Chatbot that creates completion based on vector data.
-
-**Environment Variables:**
-
-- SLACK_BOT_TOKEN: Slack Bot User OAuth Token
-
-### ■ OpenAI API
-The OpenAI API is used for natural language understanding and other AI-powered features. You'll need an OpenAI API key for these features.
-
-**Environment Variables:**
-
-- OPENAI_API_KEY: OpenAI API Key
