@@ -1,50 +1,37 @@
 # VectorDB-Based_GPT
-This application offers a set of valuable tools that enable you to perform the following tasks with ease:
-- File loading: Convert text data into vector data and insert it into a vector database.
-- Chatbot creation: Create a query engine using the data stored in the vector database.
+This application is RAG Chatbot, Retrieval-Augmented Generation, used on Slack.
+You can use Notion as reference data store.
 
-It also allows you to set this accessibility of data for each user by mapping it to the data in DynamoDB. <br><br>
+## Prerequirements
+- Docker Desktop
+- OpenAI API Key
+- Pinecone API Key
+- Notion Integration Secret
+- Slack Bot TOken
 
 
-## 💻 Usage
+## Preprocessing
+Execute NotionReader(NotionReader.ipynb) on Google Colaboratory. NotionReader is a tool that fetches reference data from Notion, converts them into vector data, and stores them in a vector database.
 
-| Method | Endpoint |  Description | Required Parameters |
-| ---- | ---- | ---- | ---- |
-| GET | /vector-data-list | fetch the data this application uses as reference | |
-| POST | /store-article/{accessibilityIds} | insert the data this application use as reference | - title: title of an article<br>- text: statement used as an article |
-| POST | /chat/{accessibilityIds} | query a chat content to get a completion | - chat_content: text content as a question |
-| DELETE | /vector-data | delete the data this application uses as reference | - category_id: unique id of an article |
-| POST | /slack-chat | query a chat content to get a completion via Slack | |
-| POST | /slack-chat/{accessibilityIds} | query a chat content to get a completion with limited data via Slack | |
-
-This application also provides a local execution way.
-To set up and run the project, execute the following Docker commands:
-1. Build and start the Docker containers:
-```bash
+## Usage
+You can use it on 2 ways.
+### CLI
+deployed on local environment.
+```
 $ docker compose up -d --build
 ```
-
-2. Access the application's container:
-```bash
-$ docker compose exec app bash
+```
+$ docker compose exec vectordb-based_gpt-local bash
 ```
 
-3. Now you can execute Python files within the Docker container.
+### Slack
+deployed on AWS environment.
+```
+make deploy
+```
 
-- **File loading 🗂**:<br>
-  First, make sure you have a `data` directory under the `root` directory of the project. Then run the following command to load files:
-  ```bash
-  $ python file_loader.py
-  ```
-- **Chatbot creation 🤖**:<br>
-  Run the following command to start the chatbot:
-  ```bash
-  $ python main.py
-  ```
 
-<br>
-
-## 🏗 System Architecture / Tech Stack
+## System Architecture / Tech Stack
 This application relies on several key technologies for its operation:<br>
 
 ### ■ AWS Lambda
@@ -71,25 +58,3 @@ Pinecone is used for vector databases to store vector data made from text data.
 - PINECONE_INDEX_NAME: The name of your Pinecone project
   
 <br>
-
-## 🌐 Third-Party Integrations
-This application integrates with various third-party services for enhanced functionalities:
-
-### ■ Slack API
-The Slack API is used for Chatbot that creates completion based on vector data.
-
-**Environment Variables:**
-
-- SLACK_BOT_TOKEN: Slack Bot User OAuth Token
-
-### ■ OpenAI API
-The OpenAI API is used for natural language understanding and other AI-powered features. You'll need an OpenAI API key for these features.
-
-**Environment Variables:**
-
-- OPENAI_API_KEY: OpenAI API Key
-
-<br><br>
-
-## 日本語記事
-https://qiita.com/nosandone/items/8311db2992bf138f8fc8

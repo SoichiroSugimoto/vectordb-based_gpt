@@ -1,7 +1,6 @@
 import logging
 import os
 import constants as const
-
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 

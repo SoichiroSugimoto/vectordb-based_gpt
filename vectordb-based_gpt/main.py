@@ -3,15 +3,11 @@ import os
 import sys
 import openai
 import retriever
+# from storer import LocalFileReader
 
-try:
-    accessibility_ids = [sys.argv[1]]
-except IndexError:
-    accessibility_ids = ["001"]
-
-
+# Purpose: This is the main entry point for the application of local usage.
 def main():
-    query_engine = retriever.create_query_engine(accessibility_ids)
+    query_engine = retriever.create_query_engine(1)
     print("Enter a value (press Ctrl+C to exit)")
     conversation_buffer = []
     while True:
@@ -20,14 +16,14 @@ def main():
             conversation_buffer.append(input_value)
             content = "\n\n".join(conversation_buffer)
             chat_completion = query_engine.query(content)
-            print("output:", chat_completion)
+            reference_urls = retriever.get_reference_urls(chat_completion)
+            print("output:", vars(chat_completion)['response'] + "\n" + reference_urls)
         except KeyboardInterrupt:
             print("\nExiting...")
             break
         except Exception as e:
-            print("Error:", e)
+            print(f"Error: {type(e).__name__}, {e}")
             break
-
 
 if __name__ == "__main__":
     main()

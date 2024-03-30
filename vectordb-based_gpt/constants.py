@@ -15,5 +15,6 @@ if os.getenv('FORMATTED_PROMPT_TEXT') is None or \
 else:
     FORMATTED_PROMPT_TEXT = os.environ['FORMATTED_PROMPT_TEXT']
 MESSAGE_PLEASE_WAITING = "The message has been received. \
-    \nPlease wait while we generate your answer: "
+    \nPlease wait while we generate answer: "
 MESSAGE_ANSWER_UNGENERATED = "Sorry, I don't know the answer."
+REFERENCE_GUIDE_TEXT = "*詳細はこちらをご参照ください。*"
