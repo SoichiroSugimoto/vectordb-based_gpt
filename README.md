@@ -1,6 +1,7 @@
 # VectorDB-Based_GPT
 This application is RAG Chatbot, Retrieval-Augmented Generation, used on Slack.
 You can use Notion as reference data store.
+<img width="50%" src="https://github.com/SoichiroSugimoto/vectordb-based_gpt/assets/52186679/6ffe7367-e05c-4818-8c38-cfc4eb2acf8e">
 
 ## Prerequirements
 - Docker Desktop
