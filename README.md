@@ -1,41 +1,31 @@
 # VectorDB-Based_GPT
-This application offers a set of valuable tools that enable you to perform the following tasks with ease:
-- File loading: Convert text data into vector data and insert it into a vector database.
-- Chatbot creation: Create a query engine using the data stored in the vector database.
+This application is RAG Chatbot, Retrieval-Augmented Generation, used on Slack.
+You can use Notion as reference data store.
 
-It also allows you to set this accessibility of data for each user by mapping it to the data in DynamoDB. <br><br>
+## Prerequirements
+- Docker Desktop
+- OpenAI API Key
+- Pinecone API Key
+- Notion Integration Secret
 
 
-## 💻 Usage
-To set up and run the project, execute the following Docker commands:
-1. Build and start the Docker containers:
-```bash
+## Preprocessing
+Execute NotionReader(NotionReader.ipynb) on Google Colaboratory. NotionReader is a tool that fetches reference data from Notion, converts them into vector data, and stores them in a vector database.
+
+## Usage
+You can use it on 2 ways.
+### CLI
+deployed on local environment.
+```
 $ docker compose up -d --build
 ```
-
-2. Access the application's container:
-```bash
-$ docker compose exec app bash
+```
+$ docker compose exec vectordb-based_gpt-local bash
 ```
 
-3. Now you can execute Python files within the Docker container.
+### Slack
+deployed on AWS environment.
 
-- **File loading 🗂**:<br>
-  First, make sure you have a `data` directory under the `root` directory of the project. Then run the following command to load files:
-  ```bash
-  $ python file_loader.py
-  ```
-- **Chatbot creation 🤖**:<br>
-  Run the following command to start the chatbot:
-  ```bash
-  $ python main.py
-  ```
-
-<br>
-
-**You can use Slack as an Interface of Chatbot as well.**
-
-<br>
 
 ## 🏗 System Architecture / Tech Stack
 This application relies on several key technologies for its operation:<br>
@@ -65,7 +55,7 @@ Pinecone is used for vector databases to store vector data made from text data.
   
 <br>
 
-## 🌐 Third-Party Integrations
+## Third-Party Integrations
 This application integrates with various third-party services for enhanced functionalities:
 
 ### ■ Slack API

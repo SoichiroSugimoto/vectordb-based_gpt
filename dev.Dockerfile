@@ -1,5 +1,3 @@
-# Execution Command: docker run -it -v $(pwd)/vectordb-based_gpt:/vectordb-based_gpt vectordb-based_gpt:dev
-
 FROM public.ecr.aws/sam/build-python3.9:1.100.0-20231031003451
 USER root
 
